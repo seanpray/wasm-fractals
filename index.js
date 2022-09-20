@@ -20,12 +20,12 @@ import('./pkg')
             const picked = selection.options[selection.selectedIndex].value;
             console.log(selection.options[selection.selectedIndex].value)
             //select.options[select.selectedIndex].value
-            wasm.draw(ctx, 750, 750, picked, real, imaginary, cut_off);
+            wasm.draw(ctx, 4000, 4000, picked, real, imaginary, cut_off);
             time.innerHTML = (Date.now() - start);
         });
         let time = document.getElementById('time');
         const start = Date.now();
-        wasm.draw(ctx,  750, 750, "julia", -0.15, 0.65, 500);
+        wasm.draw(ctx, 4000, 4000, "", -0.15, 0.65, 500);
         time.innerHTML = (Date.now() - start);
     })
     .catch(console.error);

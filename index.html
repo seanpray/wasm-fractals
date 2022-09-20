@@ -2,6 +2,7 @@
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+    <link rel="stylesheet" href="./index.css">
   </head>
   <body>
     <main>
@@ -20,7 +21,8 @@
           <input type="number" name="cut_off" id="cut_off" value="500" step="1">
         </div>
         <select id="selection">
-            <option value="julia" selected>julia set</option>
+            <option value="" selected>none</option>
+            <option value="julia">julia set</option>
             <option value="mandel">mandelbrot</option>
             <option value="ship">burning ship</option>
         </select>
@@ -28,7 +30,7 @@
         <inline><div id="time">ms</div> ms</inline>
 
       </div>
-      <canvas id="drawing" width="750px" height="750px"></canvas>
+      <canvas id="drawing" width="4000px" height="4000px"></canvas>
     </main>
   </body>
 </html>

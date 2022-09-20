@@ -14,8 +14,7 @@ pub fn draw(
     cut_off: u32,
 ) -> Result<(), JsValue> {
     let mut gen = Generator::new(real, imaginary, (width, height), &draw_type, ctx, cut_off);
-    gen.render();
-    gen.set_canvas()
+    gen.render()
 }
 
 struct Generator<'a> {
@@ -44,25 +43,22 @@ impl<'a> Generator<'a> {
             cut_off,
         }
     }
-    pub(crate) fn render(&mut self) {
+    pub(crate) fn render(&mut self) -> Result<(), JsValue> {
         match self.draw_type {
             "julia" => {
-                // let c = Complex { real, imaginary };
-                // let data = get_julia_set(width, height, c, cut_off);
-                // let data = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&data), width, height)?;
-                // ctx.put_image_data(&data, 0.0, 0.0)
                 self.julia_set();
+                self.set_canvas()
             }
             "mandel" => {
-                // let c = Complex { real, imaginary };
-                // ctx.put_image_data(imagedata, dx, dy)
                 self.mandel();
+                self.set_canvas()
             }
             "ship" => {
                 self.burning_ship();
+                self.set_canvas()
             }
-            _ => {}
-        };
+            _ => Ok(())
+        }
     }
     pub(crate) fn set_canvas(&self) -> Result<(), JsValue> {
         let data = ImageData::new_with_u8_clamped_array_and_sh(
@@ -93,66 +89,59 @@ impl<'a> Generator<'a> {
         }
     }
     fn mandel(&mut self) {
-        let param_i = 1.5;
-        let param_r = 1.5;
-        let scale = 0.005;
-
+        let cxmin = -2.0;
+        let cxmax = 0.5;
+        let cymin = -1.0;
+        let cymax = 1.0;
+        // let z = Complex {
+        //     real: 0.0,
+        //     imaginary: 0.0,
+        // };
         for x in 0..self.dimensions.0 {
             for y in 0..self.dimensions.1 {
-                let z = Complex {
-                    real: y as f64 * scale - param_r,
-                    imaginary: x as f64 * scale - param_i,
+                let c = Complex {
+                    real: (cxmin + x as f64) / (self.dimensions.0 as f64 - 1.0) * (cxmax - cxmin),
+                    imaginary: (cymin + y as f64) / (self.dimensions.1 as f64 - 1.0) * (cymax - cymin),
                 };
-                let b = Self::check_bound(z, self.c, self.cut_off);
+                let b = Self::check_bound(self.c, c, self.cut_off);
                 if b == self.cut_off {
-                    for _ in 0..4 {
+                    for _ in 0..3 {
                         self.data.push(0);
                     }
+                    self.data.push(255);
                 } else {
-                    let color = 255.0 - (b as f64 * 3.1875);
-                    self.data.push((color % 16.0 * 8.0) as u8);
-                    self.data.push((color % 8.0 * 32.0) as u8);
-                    self.data.push((color % 4.0 * 64.0) as u8);
+                    self.data.push((b % 8 * 32) as u8);
+                    self.data.push((b % 16 * 8) as u8);
+                    self.data.push((b % 4 * 64) as u8);
                     self.data.push(255);
                 }
-                // let z = Complex {
-                //     real: ((x as f64 - (0.75 * self.dimensions.0 as f64))
-                //         / (self.dimensions.0 as f64 / 4.0)),
-                //     imaginary: ((y as f64 - (self.dimensions.0 as f64 / 4.0))
-                //         / self.dimensions.0 as f64
-                //         / 4.0),
-                // };
-                // let iter_index = Self::get_iter_index(z, self.c, self.cut_off);
-                // if iter_index == self.cut_off {
-                //     for _ in 0..4 {
-                //         self.data.push(0);
-                //     }
-                // } else {
-                //     let color = Self::hsv_to_rgb(iter_index as f64 / 255.0, 1.0, 0.5);
-                //     self.data.push(color.0);
-                //     self.data.push(color.1);
-                //     self.data.push(color.2);
-                //     self.data.push(255);
-                // }
             }
         }
     }
     fn burning_ship(&mut self) {
-        let param_i = 1.5;
-        let param_r = 1.5;
-        let scale = 0.005;
+        let cxmin = -2.0;
+        let cxmax = 0.5;
+        let cymin = -1.0;
+        let cymax = 1.0;
 
         for x in 0..self.dimensions.0 {
             for y in 0..self.dimensions.1 {
-                let z = Complex {
-                    real: y as f64 * scale - param_r,
-                    imaginary: x as f64 * scale - param_i,
+                let c = Complex {
+                    real: (cxmin + x as f64) / (self.dimensions.0 as f64 - 1.0) * (cxmax- cxmin),
+                    imaginary: (cymin + y as f64) / (self.dimensions.1 as f64 - 1.0) * (cymax - cymin),
                 };
-                let b = Self::check_bound_abs(z, self.c, self.cut_off);
-                self.data.push((b / 4) as u8 * 10);
-                self.data.push((b / 2) as u8 * 10);
-                self.data.push(b as u8 * 10);
-                self.data.push(255);
+                let b = Self::check_bound_abs(self.c, c, self.cut_off);
+                if b == self.cut_off {
+                    for _ in 0..3 {
+                        self.data.push(0);
+                    }
+                    self.data.push(255);
+                } else {
+                    self.data.push((b % 4 * 64) as u8);
+                    self.data.push((b % 8 * 32) as u8);
+                    self.data.push((b % 16 * 8) as u8);
+                    self.data.push(255);
+                }
             }
         }
     }
@@ -265,7 +254,7 @@ impl<'a> Generator<'a> {
         let mut bound: u32 = 0;
         let mut z = z;
         while bound < cut_off {
-            if z.norm() > 5.0 {
+            if z.norm() > 2.0 {
                 break;
             }
             z = z.abs().square() + c;
