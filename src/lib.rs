@@ -6,8 +6,8 @@ use web_sys::{CanvasRenderingContext2d, ImageData};
 #[wasm_bindgen]
 pub fn draw(
     ctx: &CanvasRenderingContext2d,
-    width: u32,
-    height: u32,
+    width: i32,
+    height: i32,
     draw_type: String,
     real: f64,
     imaginary: f64,
@@ -22,14 +22,14 @@ struct Generator<'a> {
     data: Vec<u8>,
     ctx: &'a CanvasRenderingContext2d,
     cut_off: u32,
-    dimensions: (u32, u32),
+    dimensions: (i32, i32),
     draw_type: &'a str,
 }
 impl<'a> Generator<'a> {
     pub(crate) fn new(
         real: f64,
         imaginary: f64,
-        dimensions: (u32, u32),
+        dimensions: (i32, i32),
         draw_type: &'a str,
         ctx: &'a CanvasRenderingContext2d,
         cut_off: u32,
@@ -63,8 +63,8 @@ impl<'a> Generator<'a> {
     pub(crate) fn set_canvas(&self) -> Result<(), JsValue> {
         let data = ImageData::new_with_u8_clamped_array_and_sh(
             Clamped(&self.data),
-            self.dimensions.0,
-            self.dimensions.1,
+            (self.dimensions.0 * 2) as u32,
+            (self.dimensions.1 * 2) as u32,
         )?;
         self.ctx.put_image_data(&data, 0.0, 0.0)
     }
@@ -74,8 +74,8 @@ impl<'a> Generator<'a> {
         let param_r = 1.5;
         let scale = 0.005;
 
-        for x in 0..self.dimensions.0 {
-            for y in 0..self.dimensions.1 {
+        for x in -self.dimensions.0..self.dimensions.0 {
+            for y in -self.dimensions.1..self.dimensions.1 {
                 let z = Complex {
                     real: y as f64 * scale - param_r,
                     imaginary: x as f64 * scale - param_i,
@@ -97,8 +97,8 @@ impl<'a> Generator<'a> {
         //     real: 0.0,
         //     imaginary: 0.0,
         // };
-        for x in 0..self.dimensions.0 {
-            for y in 0..self.dimensions.1 {
+        for x in -self.dimensions.0..self.dimensions.0 {
+            for y in -self.dimensions.1..self.dimensions.1 {
                 let c = Complex {
                     real: (cxmin + x as f64) / (self.dimensions.0 as f64 - 1.0) * (cxmax - cxmin),
                     imaginary: (cymin + y as f64) / (self.dimensions.1 as f64 - 1.0) * (cymax - cymin),
@@ -111,8 +111,8 @@ impl<'a> Generator<'a> {
                     self.data.push(255);
                 } else {
                     self.data.push((b % 8 * 32) as u8);
-                    self.data.push((b % 16 * 8) as u8);
-                    self.data.push((b % 4 * 64) as u8);
+                    self.data.push(((b * 3) % 256) as u8);
+                    self.data.push((b % 256) as u8);
                     self.data.push(255);
                 }
             }
@@ -124,8 +124,8 @@ impl<'a> Generator<'a> {
         let cymin = -1.0;
         let cymax = 1.0;
 
-        for x in 0..self.dimensions.0 {
-            for y in 0..self.dimensions.1 {
+        for x in -self.dimensions.0..self.dimensions.0 {
+            for y in -self.dimensions.1..self.dimensions.1 {
                 let c = Complex {
                     real: (cxmin + x as f64) / (self.dimensions.0 as f64 - 1.0) * (cxmax- cxmin),
                     imaginary: (cymin + y as f64) / (self.dimensions.1 as f64 - 1.0) * (cymax - cymin),
@@ -254,7 +254,7 @@ impl<'a> Generator<'a> {
         let mut bound: u32 = 0;
         let mut z = z;
         while bound < cut_off {
-            if z.norm() > 2.0 {
+            if z.norm().abs() > 2.0 {
                 break;
             }
             z = z.abs().square() + c;

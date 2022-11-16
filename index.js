@@ -7,9 +7,6 @@ import('./pkg')
         const imaginaryInput = document.getElementById('imaginary');
         const cut_offInput = document.getElementById('cut_off');
         const renderBtn = document.getElementById('render');
-        const selectionInput = document.getElementById('selection');
-        console.log(selectionInput)
-
         renderBtn.addEventListener('click', () => {
             let time = document.getElementById('time');
             const start = Date.now();
@@ -18,14 +15,12 @@ import('./pkg')
             const cut_off = parseInt(cut_offInput.value) || 500;
             const selection = document.getElementById('selection');
             const picked = selection.options[selection.selectedIndex].value;
-            console.log(selection.options[selection.selectedIndex].value)
-            //select.options[select.selectedIndex].value
-            wasm.draw(ctx, 4000, 4000, picked, real, imaginary, cut_off);
+            wasm.draw(ctx, window.innerWidth / 2, window.innerWidth / 2, picked, real, imaginary, cut_off);
             time.innerHTML = (Date.now() - start);
         });
         let time = document.getElementById('time');
         const start = Date.now();
-        wasm.draw(ctx, 4000, 4000, "", -0.15, 0.65, 500);
+        wasm.draw(ctx, window.innerWidth / 2, window.innerWidth / 2, "", -0.15, 0.65, 500);
         time.innerHTML = (Date.now() - start);
     })
     .catch(console.error);
