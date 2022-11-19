@@ -45,20 +45,12 @@ impl<'a> Generator<'a> {
     }
     pub(crate) fn render(&mut self) -> Result<(), JsValue> {
         match self.draw_type {
-            "julia" => {
-                self.julia_set();
-                self.set_canvas()
-            }
-            "mandel" => {
-                self.mandel();
-                self.set_canvas()
-            }
-            "ship" => {
-                self.burning_ship();
-                self.set_canvas()
-            }
-            _ => Ok(())
+            "julia" => self.julia_set(),
+            "mandel" => self.mandel(),
+            "ship" => self.burning_ship(),
+            _ => return Ok(()),
         }
+        self.set_canvas()
     }
     pub(crate) fn set_canvas(&self) -> Result<(), JsValue> {
         let data = ImageData::new_with_u8_clamped_array_and_sh(
