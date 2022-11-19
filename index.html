@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+    <link rel="stylesheet" href="./index.css">
+  <script defer src="index.js"></script></head>
+  <body>
+    <main>
+      <div class="controls">
+        <h1>C =</h1>
+        <div>
+          <label for="real">real</label>
+          <input type="number" name="real" id="real" value="-0.15" step="0.01">
+        </div>
+        <div>
+          <label for="imaginary">imaginary</label>
+          <input type="number" name="imaginary" id="imaginary" value="0.65" step="0.01">
+        </div>
+        <div>
+          <label for="cut_off">cut off</label>
+          <input type="number" name="cut_off" id="cut_off" value="500" step="1">
+        </div>
+        <select id="selection">
+            <option value="" selected>none</option>
+            <option value="julia">julia set</option>
+            <option value="mandel">mandelbrot</option>
+            <option value="ship">burning ship</option>
+        </select>
+        <button class="button-primary" id="render">render</button>
+        <inline><div id="time">ms</div> ms</inline>
+
+      </div>
+      <canvas id="drawing" width="4000px" height="4000px"></canvas>
+    </main>
+  </body>
+</html>
